@@ -1,37 +1,50 @@
-name: Primer Pipeline CI
+name: Pipeline CI
 
 on:
   push:
     branches:
       - main
+      - "feature/**"
   pull_request:
     branches:
       - main
 
 jobs:
-  hello-ci:
-    name: Hello CI
+  build:
+    name: Build and Test
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Mostrar información del entorno
-        run: |
-          echo "================================"
-          echo "      PRIMER PIPELINE CI"
-          echo "================================"
-          echo "Repositorio: ${{ github.repository }}"
-          echo "Rama: ${{ github.ref_name }}"
-          echo "Commit: ${{ github.sha }}"
-          echo "================================"
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
 
-      - name: Mostrar fecha y hora
-        run: date
+      # 1. Compilación
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml -DskipTests
 
-      - name: Mostrar versión de Git
-        run: git --version
+      # 2. Pruebas y generación de reporte JaCoCo
+      - name: Run tests and generate JaCoCo report
+        run: mvn -B test jacoco:report --file pom.xml
 
-      - name: Finalizar pipeline
-        run: echo "Pipeline ejecutado correctamente."
+      # 3. Publicar artefacto: Reporte de Pruebas Unitarias
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-test-reports
+          path: target/surefire-reports/
+
+      # 4. Publicar artefacto: Reporte de Cobertura JaCoCo
+      - name: Upload JaCoCo Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-coverage-report
+          path: target/site/jacoco/
