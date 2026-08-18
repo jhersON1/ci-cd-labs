@@ -25,8 +25,26 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      # 1. Compilación
       - name: Build with Maven
         run: mvn -B package --file pom.xml -DskipTests
 
-      - name: Run tests with Maven
-        run: mvn -B test --file pom.xml
+      # 2. Pruebas y generación de reporte JaCoCo
+      - name: Run tests and generate JaCoCo report
+        run: mvn -B test jacoco:report --file pom.xml
+
+      # 3. Publicar artefacto: Reporte de Pruebas Unitarias
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-test-reports
+          path: target/surefire-reports/
+
+      # 4. Publicar artefacto: Reporte de Cobertura JaCoCo
+      - name: Upload JaCoCo Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-coverage-report
+          path: target/site/jacoco/
