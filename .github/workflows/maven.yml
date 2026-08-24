@@ -30,7 +30,7 @@ jobs:
         run: mvn -B package --file pom.xml -DskipTests
 
       # 2. Pruebas y generación de reporte JaCoCo
-      - name: Run tests and generate JaCoCo report
+      - name: Run tests with maven and generate JaCoCo report
         run: mvn -B test jacoco:report --file pom.xml
 
       # 3. Publicar artefacto: Reporte de Pruebas Unitarias
