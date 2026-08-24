@@ -31,7 +31,7 @@ jobs:
 
       # 2. Pruebas y generación de reporte JaCoCo
       - name: Run tests with maven and generate JaCoCo report
-        run: mvn -B test jacoco:report --file pom.xml
+        run: mvn -B verify --file pom.xml
 
       # 3. Publicar artefacto: Reporte de Pruebas Unitarias
       - name: Upload Test Results
